@@ -361,10 +361,12 @@ try {
             }
             
             .nav-menu {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
+                position: fixed !important;
+                top: 60px;
+                left: 2.5vw;
+                right: 2.5vw;
+                width: 95vw;
+                max-width: 95vw;
                 background: linear-gradient(135deg, #3a2676 80%, #5f4bb6 100%);
                 border: 3px solid #fff;
                 border-radius: 15px;
@@ -372,18 +374,15 @@ try {
                 flex-direction: column;
                 gap: 12px;
                 z-index: 9999;
-                transform: translateY(-10px);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
+                display: none;
                 box-shadow: 0 8px 25px rgba(60, 40, 120, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(10px);
             }
             
-            .nav-menu-open {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
+            .nav-menu.nav-menu-open {
+                display: flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
                 animation: menuSlideIn 0.4s ease-out;
             }
             
@@ -400,6 +399,22 @@ try {
                     transform: translateY(0);
                     opacity: 1;
                 }
+            }
+            
+            .menu-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 9998;
+                display: none;
+                backdrop-filter: blur(2px);
+            }
+            
+            .menu-overlay.show {
+                display: block;
             }
             
             .nav-btn {
@@ -426,13 +441,14 @@ try {
             }
             
             .logout-btn {
-                background: linear-gradient(45deg, rgba(72, 52, 212, 0.9), rgba(104, 109, 224, 0.7));
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
                 color: #fff;
-                border-color: #4834d4;
+                border-color: #e74c3c;
             }
             
             .logout-btn:hover {
-                background: linear-gradient(45deg, rgba(72, 52, 212, 1), rgba(104, 109, 224, 0.9));
+                background: linear-gradient(45deg, #ff6b6b, #e74c3c);
+                transform: scale(1.05);
             }
             
             .subscribe-btn {
@@ -564,6 +580,30 @@ try {
                 padding: 8px 0;
                 margin-right: 8px;
             }
+            
+            .game-loading {
+                width: 100vw;
+                height: 100vh;
+                padding: 20px;
+            }
+            
+            .game-loading .loading {
+                width: 60px;
+                height: 60px;
+                border-width: 5px;
+                margin-bottom: 25px;
+            }
+            
+            .game-loading h3 {
+                font-size: 20px;
+                margin-bottom: 12px;
+            }
+            
+            .game-loading p {
+                font-size: 14px;
+                max-width: 300px;
+                line-height: 1.5;
+            }
         }
 
       
@@ -580,6 +620,57 @@ try {
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        .game-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            backdrop-filter: blur(10px);
+            pointer-events: all;
+            user-select: none;
+        }
+        
+        .game-loading .loading {
+            width: 80px;
+            height: 80px;
+            border-width: 6px;
+            margin-bottom: 30px;
+            border-top-color: #fff;
+            border-right-color: #fff;
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+            border-left-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .game-loading h3 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .game-loading p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
 
         .navigation-container {
             position: relative;
@@ -594,7 +685,7 @@ try {
         }
         
         .hamburger-btn {
-            display: none;
+            display: flex;
             flex-direction: column;
             background: linear-gradient(45deg, rgba(255, 107, 107, 0.9), rgba(238, 90, 36, 0.9));
             border: 2px solid #fff;
@@ -636,6 +727,30 @@ try {
             max-width: 95vw;
             z-index: 9999;
             display: none;
+            background: linear-gradient(135deg, #3a2676 80%, #5f4bb6 100%);
+            border: 3px solid #fff;
+            border-radius: 15px;
+            padding: 20px;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(60, 40, 120, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 9998;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        
+        .menu-overlay.show {
+            display: block;
         }
         
         .nav-menu.nav-menu-open {
@@ -645,32 +760,47 @@ try {
         }
         
         .nav-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: rgba(255,255,255,0.08);
             border: 2px solid #fff;
-            border-radius: 8px;
-            color: white;
-            padding: 10px 15px;
+            border-radius: 12px;
+            color: #fff;
+            padding: 16px 0;
             font-family: 'Press Start 2P', cursive;
-            font-size: 10px;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 0 #c44569;
+            transition: all 0.2s;
+            box-shadow: 0 2px 0 #3a2676;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 6px;
         }
         
-        .nav-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 0 #c44569;
+        .nav-btn:hover, .nav-btn:focus {
+            background: linear-gradient(90deg, #ff6b6b 30%, #ee5a24 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px #5f4bb6;
+            transform: scale(1.04);
         }
         
         .logout-btn {
-            background: linear-gradient(45deg, #4834d4, #686de0);
-            box-shadow: 0 2px 0 #2c3e50;
+            background: linear-gradient(45deg, rgba(72, 52, 212, 0.9), rgba(104, 109, 224, 0.7));
+            color: #fff;
+            border-color: #4834d4;
         }
         
         .logout-btn:hover {
-            box-shadow: 0 3px 0 #2c3e50;
+            background: linear-gradient(45deg, rgba(72, 52, 212, 1), rgba(104, 109, 224, 0.9));
+        }
+        
+        .subscribe-btn {
+            background: linear-gradient(90deg, #ffe259 0%, #ffa751 100%);
+            color: #3a2676;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+        .subscribe-btn:hover, .subscribe-btn:focus {
+            background: linear-gradient(90deg, #ffb347 0%, #ffcc33 100%);
+            color: #3a2676;
         }
 
         /* 答題結果樣式 */
@@ -790,7 +920,7 @@ try {
             border: 3px solid #fff;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             z-index: 99999;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.1s ease;
         }
 
         @keyframes slideIn {
@@ -882,23 +1012,158 @@ try {
             min-height: 80vh;
             padding: 0 4vw;
         }
+        
+        .auth-form-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 30px 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 4px 16px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-form-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .auth-form-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
         .auth-container form {
             width: 100%;
-            max-width: 340px;
-            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
+        
         .auth-container .nintendo-btn {
             width: 100%;
-            max-width: 320px;
-            font-size: 18px;
+            font-size: 16px;
             padding: 16px 0;
-            margin-bottom: 10px;
-            border-radius: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            position: relative;
+            z-index: 1;
         }
+        
         .auth-container .nintendo-btn.secondary {
             margin-top: 0;
             background: linear-gradient(45deg, #4834d4, #686de0);
         }
+        
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .auth-submit-btn,
+        .auth-toggle-btn {
+            width: 100%;
+            font-size: 16px;
+            padding: 14px 0;
+            border-radius: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .nintendo-title {
+                font-size: 28px;
+                margin: 50px auto;
+            }
+            
+            .auth-form-container {
+                padding: 25px 20px;
+                max-width: 90vw;
+                border-radius: 16px;
+            }
+            
+            .auth-form-container h2 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+            
+            .auth-buttons {
+                flex-direction: row;
+                gap: 8px;
+            }
+            
+            .auth-submit-btn,
+            .auth-toggle-btn {
+                flex: 1;
+                font-size: 14px;
+                padding: 12px 8px;
+                min-width: 0;
+            }
+            .add-to-collection-btn {
+                font-size: 12px;
+                padding: 10px 15px;
+                border-radius: 6px;
+                min-height: 40px;
+            }
+            .modal-buttons {
+                flex-direction: row;
+                gap: 8px;
+            }
+            
+            .modal-save-btn,
+            .modal-cancel-btn {
+                flex: 1;
+                font-size: 14px;
+                padding: 10px 8px;
+                min-width: 0;
+            }
+        }
+
+        .add-to-collection-btn {
+            font-size: 14px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .modal-save-btn,
+        .modal-cancel-btn {
+            width: 100%;
+            font-size: 16px;
+            padding: 12px 0;
+            border-radius: 10px;
+        }
+   
     </style>
 </head>
 <body>
@@ -909,13 +1174,18 @@ try {
                 <div class="loading"></div>
                 <p style="margin-top: 20px;">載入中...</p>
             </div>
+            <div v-if="gameLoading" class="game-loading">
+                <div class="loading"></div>
+
+                <p>正在生成{{ questionCount }} 道 {{ selectedTopic }} 的題目<br>請稍等片刻，馬上開始挑戰！</p>
+            </div>
 
           
             <div v-else-if="!isLoggedIn" class="auth-container">
                 <h1 class="nintendo-title">AI 學習遊戲</h1>
                 
-                <div>
-                    <h2 style="text-align: center; margin-bottom: 20px;">{{ isRegistering ? '註冊' : '登入' }}</h2>
+                <div class="auth-form-container">
+                    <h2>{{ isRegistering ? '註冊' : '登入' }}</h2>
                     
                     <form @submit.prevent="handleAuth">
                         <div style="margin-bottom: 15px;">
@@ -948,16 +1218,16 @@ try {
                             >
                         </div>
                         
-                        <button type="submit" class="nintendo-btn" style="width: 100%;">
-                            {{ isRegistering ? '註冊' : '登入' }}
-                        </button>
+                        <div class="auth-buttons">
+                            <button type="submit" class="nintendo-btn auth-submit-btn">
+                                {{ isRegistering ? '註冊' : '登入' }}
+                            </button>
+                            
+                            <button type="button" @click="toggleAuthMode" class="nintendo-btn secondary auth-toggle-btn">
+                                {{ isRegistering ? '已有帳號？登入' : '註冊' }}
+                            </button>
+                        </div>
                     </form>
-                    
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button @click="toggleAuthMode" class="nintendo-btn secondary">
-                            {{ isRegistering ? '已有帳號？登入' : '沒有帳號？註冊' }}
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -975,6 +1245,7 @@ try {
                     </div>
                 </div>
          
+                <div :class="['menu-overlay', { 'show': showMenu }]" @click="showMenu = false"></div>
                 <div :class="['nav-menu', { 'nav-menu-open': showMenu }]">
                     <button @click="navigateTo('game')" class="nav-btn">遊戲</button>
                     <button @click="navigateTo('notes')" class="nav-btn">筆記</button>
@@ -1103,8 +1374,8 @@ try {
                             </div>
                             
                             <div style="margin-top: 10px;">
-                                <button @click="addToWrongQuestions(result)" class="nintendo-btn secondary">
-                                    ★ 加入收藏
+                                <button @click="addToWrongQuestions(result)" class="nintendo-btn secondary add-to-collection-btn">
+                                    加入收藏
                                 </button>
                             </div>
                         </div>
@@ -1211,9 +1482,9 @@ try {
                         <textarea v-model="newNote.content" placeholder="使用Markdown語法撰寫筆記..."></textarea>
                     </div>
                     <div class="note-preview" v-html="renderMarkdown(newNote.content)"></div>
-                    <div style="margin-top: 15px;">
-                        <button @click="saveNote" class="nintendo-btn">{{ isEditingNote ? '儲存變更' : '儲存' }}</button>
-                        <button @click="showCreateNote = false; isEditingNote = false; editingNoteId = null; newNote = { title: '', content: '', tags: [] }" class="nintendo-btn secondary">取消</button>
+                    <div class="modal-buttons">
+                        <button @click="saveNote" class="nintendo-btn modal-save-btn">{{ isEditingNote ? '儲存變更' : '儲存' }}</button>
+                        <button @click="showCreateNote = false; isEditingNote = false; editingNoteId = null; newNote = { title: '', content: '', tags: [] }" class="nintendo-btn secondary modal-cancel-btn">取消</button>
                     </div>
                 </div>
             </div>

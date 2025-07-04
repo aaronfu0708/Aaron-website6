@@ -4,6 +4,7 @@ createApp({
     data() {
         return {
             loading: true,
+            gameLoading: false,
             isLoggedIn: false,
             isRegistering: false,
             user: null,
@@ -114,6 +115,7 @@ createApp({
                     if (action === 'login') {
                         this.isLoggedIn = true;
                         this.user = data.user;
+                        this.showMenu = false; // 確保登入後選單是關閉的
                         await this.loadGameData();
                         this.showNotification('登入成功！', 'success');
                     } else {
@@ -223,6 +225,9 @@ createApp({
                 return;
             }
             
+            // 顯示載入動畫
+            this.gameLoading = true;
+            
             try {
                 const response = await fetch('api/questions.php?action=generate', {
                     method: 'POST',
@@ -252,6 +257,9 @@ createApp({
                 }
             } catch (error) {
                 this.showNotification('生成題目失敗', 'error');
+            } finally {
+                // 隱藏載入動畫
+                this.gameLoading = false;
             }
         },
         
@@ -592,9 +600,10 @@ createApp({
                 type
             };
             
+            // 統一設定為0.3秒
             setTimeout(() => {
                 this.notification.show = false;
-            }, 3000);
+            }, 300);
         },
         
         // 漢堡選單方法
