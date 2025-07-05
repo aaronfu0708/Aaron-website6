@@ -134,7 +134,7 @@ function generateSingleQuestion($topic, $difficulty) {
     $prompt = "請為主題「{$topic}」生成一道{$difficulty}難度的選擇題。要求：
 1. 題目要清晰明確
 2. 提供4個選項，其中只有1個正確答案
-3. 選項要合理且具有迷惑性
+3. 選項要合理，不要出現明顯的錯誤
 4. 提供詳細的解析說明
 5. 內容要適合學習，避免不當內容
 
@@ -222,75 +222,7 @@ function callCohere($prompt) {
     return null;
 }
 
-function callHuggingFace($prompt) {
-    // 使用確定可用的 Hugging Face 模型
-    $models = [
-        'gpt2' => 'GPT-2 模型',
-        'distilgpt2' => 'DistilGPT-2 模型',
-        'EleutherAI/gpt-neo-125M' => 'GPT-Neo 125M 模型',
-        'microsoft/DialoGPT-medium' => 'DialoGPT 中型模型'
-    ];
-    
-    foreach ($models as $model => $description) {
-        $response = callHuggingFaceModel($model, $prompt);
-        if ($response) {
-            return $response;
-        }
-    }
-    
-    return null;
-}
 
-function callHuggingFaceModel($model, $prompt) {
-    $url = HUGGINGFACE_API_URL . $model;
-    
-    $data = [
-        'inputs' => $prompt,
-        'parameters' => [
-            'max_length' => 200,
-            'temperature' => 0.7,
-            'do_sample' => true
-        ]
-    ];
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json'
-    ]);
-    
-    // 如果有 API 金鑰，添加認證
-    if (defined('HUGGINGFACE_API_KEY') && !empty(HUGGINGFACE_API_KEY)) {
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . HUGGINGFACE_API_KEY
-        ]);
-    }
-    
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($error || $httpCode !== 200) {
-        return null;
-    }
-
-    if ($response) {
-        $result = json_decode($response, true);
-        if (isset($result[0]['generated_text'])) {
-            return $result[0]['generated_text'];
-        }
-    }
-
-    return null;
-}
 
 function callOpenAIService($prompt) {
     // 檢查 API 金鑰是否有效

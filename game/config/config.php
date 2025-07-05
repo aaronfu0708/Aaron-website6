@@ -5,7 +5,7 @@ define('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions');
 
 // AI 服務設定
 define('USE_COHERE', true); 
-define('COHERE_API_KEY', ''); // 替換 Cohere API 金鑰
+define('COHERE_API_KEY', ''); // 請在此處填入新的 Cohere API 金鑰
 define('COHERE_API_URL', 'https://api.cohere.ai/v1/generate');
 
 

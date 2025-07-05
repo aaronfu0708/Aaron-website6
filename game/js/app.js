@@ -1,8 +1,9 @@
+
 const { createApp } = Vue;
 
 createApp({
     data() {
-        return {
+        const data = {
             loading: true,
             gameLoading: false,
             isLoggedIn: false,
@@ -63,8 +64,13 @@ createApp({
             },
             
             // 漢堡選單
-            showMenu: false
+            showMenu: false,
+            adminUsers: [],
+            adminUsersLoading: false,
+            subscribePlan: 'month', // 新增，預設月訂閱
         };
+        console.log('adminUsers in data:', data.adminUsers);
+        return data;
     },
     
     computed: {
@@ -603,7 +609,7 @@ createApp({
             // 統一設定為0.3秒
             setTimeout(() => {
                 this.notification.show = false;
-            }, 300);
+            }, 500);
         },
         
         // 漢堡選單方法
@@ -619,6 +625,75 @@ createApp({
             if (view === 'leaderboard') {
                 await this.loadLeaderboard();
             }
-        }
+            if(view === 'adminUsers') {
+                this.loadAdminUsers();
+            }
+            if(view === 'subscribe') {
+                this.subscribePlan = 'month'; // 預設月訂閱
+                this.currentView = 'subscribe';
+            }
+            if(view === 'unsubscribe') {
+                this.subscribePlan = 'month'; // 預設月訂閱
+                this.currentView = 'unsubscribe';
+            }
+        },
+        async loadAdminUsers() {
+            this.adminUsersLoading = true;
+            try {
+                const res = await fetch('api/users.php?action=list');
+                const data = await res.json();
+                if(data.success) {
+                    this.adminUsers = data.users;
+                } else {
+                    this.adminUsers = [];
+                    alert(data.error || '載入失敗');
+                }
+            } catch(e) {
+                this.adminUsers = [];
+                alert('載入失敗');
+            }
+            this.adminUsersLoading = false;
+        },
+        async adminUpgradeUser(userId) {
+            if(!confirm('確定要升級為訂閱用戶？')) return;
+            await fetch('api/users.php?action=upgrade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+            this.loadAdminUsers();
+        },
+        async adminDowngradeUser(userId) {
+            if(!confirm('確定要降級為一般用戶？')) return;
+            await fetch('api/users.php?action=downgrade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+            this.loadAdminUsers();
+        },
+        async adminDeleteUser(userId) {
+            if(!confirm('確定要刪除此用戶？')) return;
+            await fetch('api/users.php?action=delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+            this.loadAdminUsers();
+        },
+        subscribeUser() {
+            if (!this.user) return;
+            this.user.is_subscribed = true;
+            this.user.subscription_type = this.subscribePlan;
+            this.showNotification(`訂閱成功！您已成為月訂閱用戶。`, 'success');
+            this.navigateTo('game');
+        },
+        unsubscribeUser() {
+            if (!this.user) return;
+            this.user.is_subscribed = false;
+            this.user.subscription_type = '';
+            this.showNotification('已取消訂閱，您已回復為一般用戶。', 'info');
+            this.navigateTo('game');
+        },
     }
 }).mount('#app'); 

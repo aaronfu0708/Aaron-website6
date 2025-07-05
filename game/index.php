@@ -86,7 +86,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 題目生成與筆記學習系統</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="js/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -168,7 +168,6 @@ try {
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
 
-   
         .nintendo-input {
             background: rgba(255, 255, 255, 0.9);
             border: 3px solid #fff;
@@ -490,8 +489,8 @@ try {
                 padding: 18px 8px;
                 margin: 12px auto;
                 border-radius: 12px;
-                width: 95vw;
-                max-width: 95vw;
+                width: 96%;
+                max-width: 96%;
                 box-sizing: border-box;
             }
             .nintendo-input {
@@ -542,7 +541,7 @@ try {
             .note-preview {
                 font-size: 18px;
             }
-                    .note-btn-group {
+            .note-btn-group {
             display: flex;
             flex-direction: row;
             gap: 12px;
@@ -1163,7 +1162,95 @@ try {
             padding: 12px 0;
             border-radius: 10px;
         }
-   
+
+.question-content,
+.note-preview,
+.question-text,
+.nintendo-card p,
+.nintendo-card pre,
+.nintendo-card code {
+    font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif !important;
+    font-size: 16px;
+    letter-spacing: normal;
+}
+
+.nintendo-card strong,
+.nintendo-card b {
+    font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif !important;
+}
+
+
+.correct-answer,
+.user-answer {
+    font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif !important;
+}
+
+@media (max-width: 900px) {
+  .admin-users-container .nintendo-card {
+    overflow-x: auto;
+    padding: 0;
+  }
+  .admin-users-container table {
+    min-width: 600px;
+    width: 100%;
+    font-size: 15px;
+    font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif;
+    background: #fff;
+    color: #333;
+  }
+  .admin-users-container th,
+  .admin-users-container td {
+    white-space: nowrap;
+    padding: 10px 8px;
+    font-size: 15px;
+    font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif;
+    line-height: 1.6;
+  }
+}
+
+.admin-users-container .nintendo-card table {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(120, 100, 200, 0.08);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.admin-users-container th,
+.admin-users-container td {
+  font-size: 16px;
+  font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif;
+  padding: 12px 10px;
+  line-height: 1.7;
+  text-align: center;
+  vertical-align: middle;
+}
+.admin-users-container th {
+  background: #f8f9fa;
+  color: #333;
+}
+.admin-users-container td {
+  background: #fff;
+  color: #333;
+}
+.user-badge {
+  display: inline-block;
+  padding: 0.2em 1.2em;
+  border-radius: 1em;
+  font-size: 0.95em;
+  color: #fff;
+  background: linear-gradient(45deg, #7b6eea, #764ba2);
+  font-family: "Noto Serif TC", "PMingLiU", "Times New Roman", serif;
+}
+.user-badge.unsubscribed {
+  background: #aaa;
+}
+.user-badge.admin {
+  background: linear-gradient(45deg, #ffb347, #ffcc33);
+  color: #333;
+  font-weight: bold;
+  border: 2px solid #fff;
+}
     </style>
 </head>
 <body>
@@ -1250,8 +1337,49 @@ try {
                     <button @click="navigateTo('game')" class="nav-btn">遊戲</button>
                     <button @click="navigateTo('notes')" class="nav-btn">筆記</button>
                     <button @click="navigateTo('leaderboard')" class="nav-btn">排行榜</button>
-                    <button v-if="!user.is_subscribed" @click="navigateTo('subscribe')" class="nav-btn subscribe-btn">升級/訂閱</button>
+                    <button v-if="!user.is_subscribed && user.username !== 'Aaron'" @click="navigateTo('subscribe')" class="nav-btn subscribe-btn">升級/訂閱</button>
+                    <button v-if="user.is_subscribed && user.username !== 'Aaron'" @click="navigateTo('subscribeStatus')" class="nav-btn subscribe-btn">訂閱狀態</button>
+                    <button v-if="user.username === 'Aaron'" @click="navigateTo('adminUsers')" class="nav-btn" style="background: linear-gradient(45deg, #ffb347, #ffcc33); color: #333;">用戶管理</button>
                     <button @click="logout" class="nav-btn logout-btn">登出</button>
+                </div>
+
+                <!-- 訂閱狀態頁面：所有用戶都能查看 -->
+                <div v-if="currentView === 'subscribeStatus'" class="nintendo-card" style="max-width:480px;margin:30px auto;">
+                  <h2 class="nintendo-title">訂閱狀態</h2>
+                  <div style="margin-bottom:16px;">
+                    <span v-if="user.is_subscribed">
+                      <strong>目前方案：</strong>
+                      <span v-if="user.subscription_type === 'month'">月訂閱（$30/月）</span>
+                      <span v-else>訂閱用戶</span>
+                    </span>
+                    <span v-else>
+                      <strong>目前方案：</strong> 一般用戶
+                    </span>
+                  </div>
+                  <div v-if="user.is_subscribed">
+                    <ul style="text-align:left;margin-bottom:20px;">
+                      <li>無限生成主題與題目</li>
+                      <li>完整筆記功能</li>
+                      <li>專屬訂閱標示</li>
+                      <li>未來更多專屬權益...</li>
+                    </ul>
+                    <button @click="unsubscribeUser" class="nintendo-btn" style="background:linear-gradient(45deg,#e74c3c,#c0392b);">取消訂閱</button>
+                  </div>
+                  <div v-else>
+                    <ul style="text-align:left;margin-bottom:20px;">
+                      <li>每日/主題數量有限制</li>
+                      <li>無法建立個人筆記</li>
+                      <li>無專屬訂閱標示</li>
+                      <li>升級後享有完整權益</li>
+                    </ul>
+                    <div style="display:flex;gap:20px;justify-content:center;margin-bottom:20px;">
+                      <label style="display:flex;align-items:center;gap:6px;">
+                        <input type="radio" v-model="subscribePlan" value="month"> 月訂閱（$30/月）
+                      </label>
+                    </div>
+                    <button @click="subscribeUser" class="nintendo-btn">立即升級</button>
+                  </div>
+                  <button @click="navigateTo('game')" class="nintendo-btn secondary" style="margin-left:10px;margin-top:10px;">返回</button>
                 </div>
 
              
@@ -1470,6 +1598,85 @@ try {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- 用戶管理頁面 -->
+                <div v-if="currentView === 'adminUsers' && user.username === 'Aaron'" class="admin-users-container">
+                    <h2 class="nintendo-title">用戶管理</h2>
+                    <div class="nintendo-card">
+                        <div v-if="adminUsersLoading" style="text-align:center; padding:20px;">載入中...</div>
+                        <div v-else>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>帳號</th>
+                                        <th>Email</th>
+                                        <th>訂閱狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="u in adminUsers" :key="u.id">
+                                        <td>{{ u.id }}</td>
+                                        <td>{{ u.username }}</td>
+                                        <td>{{ u.email }}</td>
+                                        <td>
+                                          <span
+                                            :class="['user-badge', u.username === 'Aaron' ? 'admin' : (u.is_subscribed ? '' : 'unsubscribed')]"
+                                          >
+                                            {{ u.username === 'Aaron' ? '管理者' : (u.is_subscribed ? '訂閱' : '一般') }}
+                                          </span>
+                                        </td>
+                                        <td>
+                                            <button v-if="u.username !== 'Aaron' && !u.is_subscribed" @click="adminUpgradeUser(u.id)" class="nintendo-btn" style="font-size:12px; padding:4px 10px;">升級</button>
+                                            <button v-if="u.username !== 'Aaron' && u.is_subscribed" @click="adminDowngradeUser(u.id)" class="nintendo-btn secondary" style="font-size:12px; padding:4px 10px;">降級</button>
+                                            <button v-if="u.username !== 'Aaron'" @click="adminDeleteUser(u.id)" class="nintendo-btn" style="background:linear-gradient(45deg,#e74c3c,#c0392b);font-size:12px;padding:4px 10px; margin-left:5px;">刪除</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin:20px 0;">
+                        <button @click="navigateTo('game')" class="nintendo-btn">回到遊戲</button>
+                    </div>
+                </div>
+
+                <!-- 升級/訂閱頁 -->
+                <div v-if="currentView === 'subscribe' && !user.is_subscribed" class="nintendo-card" style="max-width:480px;margin:30px auto;">
+                  <h2 class="nintendo-title">升級成訂閱用戶</h2>
+                  <p style="margin-bottom:10px;">選擇訂閱方案：</p>
+                  <div style="display:flex;gap:20px;justify-content:center;margin-bottom:20px;">
+                    <label style="display:flex;align-items:center;gap:6px;">
+                      <input type="radio" v-model="subscribePlan" value="month"> 月訂閱（$30/月）
+                    </label>
+                  </div>
+                  <ul style="text-align:left;margin-bottom:20px;">
+                    <li>無限生成主題與題目</li>
+                    <li>完整筆記功能</li>
+                    <li>專屬訂閱標示</li>
+                    <li>未來更多專屬權益...</li>
+                  </ul>
+                  <button @click="subscribeUser" class="nintendo-btn">前往付款（模擬）</button>
+                  <button @click="navigateTo('game')" class="nintendo-btn secondary" style="margin-left:10px;">返回</button>
+                </div>
+
+                <!-- 取消訂閱頁 -->
+                <div v-if="currentView === 'unsubscribe' && user.is_subscribed" class="nintendo-card" style="max-width:480px;margin:30px auto;">
+                  <h2 class="nintendo-title">取消訂閱</h2>
+                  <p style="margin-bottom:10px;">目前訂閱方案：
+                    <span v-if="user.subscription_type === 'month'">月訂閱（$30/月）</span>
+                    <span v-else>訂閱用戶</span>
+                  </p>
+                  <ul style="text-align:left;margin-bottom:20px;">
+                    <li>取消後將失去無限生成主題與題目權益</li>
+                    <li>筆記功能將關閉</li>
+                    <li>專屬訂閱標示將移除</li>
+                    <li>未來如需再次訂閱可隨時升級</li>
+                  </ul>
+                  <button @click="unsubscribeUser" class="nintendo-btn" style="background:linear-gradient(45deg,#e74c3c,#c0392b);">確認取消訂閱</button>
+                  <button @click="navigateTo('game')" class="nintendo-btn secondary" style="margin-left:10px;">返回</button>
                 </div>
             </div>
 
