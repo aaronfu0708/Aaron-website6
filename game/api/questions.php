@@ -170,43 +170,193 @@ function generateSingleQuestion($topic, $difficulty) {
 }
 
 function callOpenAI($prompt) {
-    if (OPENAI_API_KEY === 'your-openai-api-key-here') {
-        return null; // 如果沒有設定API金鑰，回傳null
+    // 根據設定選擇使用哪個 AI 服務
+    if (defined('USE_COHERE') && USE_COHERE) {
+        return callCohere($prompt);
+    } else if (defined('USE_HUGGINGFACE') && USE_HUGGINGFACE) {
+        return callHuggingFace($prompt);
+    } else {
+        return callOpenAIService($prompt);
     }
+}
 
+function callCohere($prompt) {
     $data = [
-        'model' => 'gpt-3.5-turbo',
-        'messages' => [
-            [
-                'role' => 'system',
-                'content' => '你是一個專業的教育題目生成助手，專門為學習者生成高品質的選擇題。'
-            ],
-            [
-                'role' => 'user',
-                'content' => $prompt
-            ]
-        ],
-        'max_tokens' => 1000,
-        'temperature' => 0.7
+        'model' => 'command',
+        'prompt' => $prompt,
+        'max_tokens' => 500,
+        'temperature' => 0.7,
+        'k' => 0,
+        'stop_sequences' => [],
+        'return_likelihoods' => 'NONE'
     ];
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, OPENAI_API_URL);
+    curl_setopt($ch, CURLOPT_URL, COHERE_API_URL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . OPENAI_API_KEY
+        'Authorization: Bearer ' . COHERE_API_KEY
     ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
     $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
+
+    if ($error || $httpCode !== 200) {
+        return null;
+    }
 
     if ($response) {
         $result = json_decode($response, true);
-        if (isset($result['choices'][0]['message']['content'])) {
-            return $result['choices'][0]['message']['content'];
+        if (isset($result['generations'][0]['text'])) {
+            return $result['generations'][0]['text'];
+        }
+    }
+
+    return null;
+}
+
+function callHuggingFace($prompt) {
+    // 使用確定可用的 Hugging Face 模型
+    $models = [
+        'gpt2' => 'GPT-2 模型',
+        'distilgpt2' => 'DistilGPT-2 模型',
+        'EleutherAI/gpt-neo-125M' => 'GPT-Neo 125M 模型',
+        'microsoft/DialoGPT-medium' => 'DialoGPT 中型模型'
+    ];
+    
+    foreach ($models as $model => $description) {
+        $response = callHuggingFaceModel($model, $prompt);
+        if ($response) {
+            return $response;
+        }
+    }
+    
+    return null;
+}
+
+function callHuggingFaceModel($model, $prompt) {
+    $url = HUGGINGFACE_API_URL . $model;
+    
+    $data = [
+        'inputs' => $prompt,
+        'parameters' => [
+            'max_length' => 200,
+            'temperature' => 0.7,
+            'do_sample' => true
+        ]
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json'
+    ]);
+    
+    // 如果有 API 金鑰，添加認證
+    if (defined('HUGGINGFACE_API_KEY') && !empty(HUGGINGFACE_API_KEY)) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . HUGGINGFACE_API_KEY
+        ]);
+    }
+    
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($error || $httpCode !== 200) {
+        return null;
+    }
+
+    if ($response) {
+        $result = json_decode($response, true);
+        if (isset($result[0]['generated_text'])) {
+            return $result[0]['generated_text'];
+        }
+    }
+
+    return null;
+}
+
+function callOpenAIService($prompt) {
+    // 檢查 API 金鑰是否有效
+    if (empty(OPENAI_API_KEY) || OPENAI_API_KEY === 'your-openai-api-key-here') {
+        return null;
+    }
+
+    // 嘗試多個模型
+    $models = ['gpt-4o-mini', 'gpt-3.5-turbo'];
+    
+    foreach ($models as $model) {
+        $data = [
+            'model' => $model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => '你是一個專業的教育題目生成助手，專門為學習者生成高品質的選擇題。'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ],
+            'max_tokens' => 1000,
+            'temperature' => 0.7
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, OPENAI_API_URL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . OPENAI_API_KEY
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        // 檢查錯誤
+        if ($error) {
+            continue;
+        }
+
+        if ($httpCode === 429) {
+            continue;
+        }
+
+        if ($httpCode !== 200) {
+            continue;
+        }
+
+        if ($response) {
+            $result = json_decode($response, true);
+            if (isset($result['choices'][0]['message']['content'])) {
+                return $result['choices'][0]['message']['content'];
+            } else if (isset($result['error'])) {
+                continue;
+            }
         }
     }
 

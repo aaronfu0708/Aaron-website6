@@ -3,6 +3,12 @@
 define('OPENAI_API_KEY', ''); // 替換OpenAI API金鑰
 define('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions');
 
+// AI 服務設定
+define('USE_COHERE', true); 
+define('COHERE_API_KEY', ''); // 替換 Cohere API 金鑰
+define('COHERE_API_URL', 'https://api.cohere.ai/v1/generate');
+
+
 // 遊戲設定
 define('FREE_USER_DAILY_LIMIT', 20);
 define('FREE_USER_TOPIC_LIMIT', 2);
